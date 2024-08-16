@@ -12,7 +12,7 @@
   let 
     pkgs = nixpkgs.legacyPackages.${system};
   in {
-    lib.pkgs = pkgs;
+    lib.pkgs = (system: nixpkgs.legacyPackages.${system});
 
     devShells.default = pkgs.mkShell {
         # All the programs i need to edit my config.
