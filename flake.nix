@@ -23,5 +23,14 @@
           nushell
         ];
     };
-  }) // { lib.pkgs = (system: nixpkgs.legacyPackages.${system}); };
+  }) // {
+      lib.outputs = (fn:
+        flake-utils.lib.eachDefaultSystem (system:
+          fn {
+              inherit system; 
+              pkgs = nixpkgs.legacyPackages.${system};
+          } 
+        )
+     ); 
+  };
 }
