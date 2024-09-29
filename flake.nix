@@ -8,29 +8,27 @@
     self,
     nixpkgs,
     flake-utils,
-  }: flake-utils.lib.eachDefaultSystem (system: 
-  let 
-    pkgs = nixpkgs.legacyPackages.${system};
-  in {
+  }: let ful = flake-utils.lib; in {
+    lib = rec {
+      inherit (ful) mkApp meld flattenTree simpleFlake;
+      systems = ful.system;
+      mkFlake = { forSystems ? systems.default, perSystem ? {...}: {}, generic ? {...}: {} }:
+      let 
+        add_pined_pkgs = fulFn:
+          (flakeFn: 
+            fulFn (system: 
+                flakeFn { inherit system; pkgs = nixpkgs.legacyPackages.${system}; }
+            )
+          );
+        gen = add_pined_pkgs (ful.eachSystem forSystems);
+        genPassThrough = add_pined_pkgs (ful.eachSystemPassThrough forSystems);
+      in
+        (gen perSystem) // (genPassThrough generic);
 
-    devShells.default = pkgs.mkShell {
-        # All the programs i need to edit my config.
-        packages = with pkgs; [
-          # The nix lsp i use.
-          nil
-          # to run the nix flake commands.
-          just
-          nushell
-        ];
+      systemSets = rec {
+        all = ful.allSystems;
+        default = ful.defaultSystems;
+      };
     };
-  }) // {
-      lib.outputs = (fn:
-        flake-utils.lib.eachDefaultSystem (system:
-          fn {
-              inherit system; 
-              pkgs = nixpkgs.legacyPackages.${system};
-          } 
-        )
-     ); 
   };
 }
