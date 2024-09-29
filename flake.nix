@@ -12,7 +12,7 @@
     lib = rec {
       inherit (ful) mkApp meld flattenTree simpleFlake;
       systems = ful.system;
-      mkFlake = { forSystems ? systems.default, perSystem ? {...}: {}, generic ? {...}: {} }:
+      mkFlake = { forSystems ? systemSets.default, perSystem ? {...}: {}, generic ? {...}: {} }:
       let 
         add_pined_pkgs = fulFn:
           (flakeFn: 
